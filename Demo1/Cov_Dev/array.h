@@ -17,17 +17,13 @@ using namespace std;
 class array
 {
 public:
-	double* data;
-	int* size;
-	int numOfDimensions;
-	int numOfElements;
-	bool freeAbility;
+	vector<vector<double> >* vectPtr;
 
 	array();
 	array(int inNumOfDimensions, int* inSize);
 	array(int inNumOfDimensions, int* inSize, double val);
 	array(int inNumOfDimensions, int* inSize, double* arr);
-	array(int inNumOfDimensions, int* inSize, vector<vector<double> > vect);
+	array(vector<vector<double> >* vect);
 	array(array* arr);
 
 	int getSize(int dimension);

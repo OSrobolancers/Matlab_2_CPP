@@ -19,23 +19,22 @@ int main(void)
 			{30, 20, 90}, \
 			{60, 50, 70}};
 
-	int size[] = {6, 3};
+	vector<vector<double> >* vect = new vector<vector<double> >(6 , vector<double> (3));
 
-	vector<vector<double> > vect(6 , vector<double> (3));
-
-	for (int i = 0; i < size[0]; i++)
+	for (unsigned int i = 0; i < vect->size(); i++)
 	{
-		for (int j = 0; j < size[1]; j++)
+		for (unsigned int j = 0; j < (*vect)[0].size(); j++)
 		{
-			vect[i][j] = Data[i][j];
+			(*vect)[i][j] = Data[i][j];
 		}
 	}
 
-	array* data = new array(2, size, vect);
+	array* data = new array(vect);
 	array* result = cov(data);
 
 	result->print();
 	result->freeArray(result);
+	free(vect);
 
 	return 0;
 }

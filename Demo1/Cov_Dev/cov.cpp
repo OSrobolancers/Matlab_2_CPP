@@ -9,16 +9,15 @@
 
 array* cov(array* data)
 {
-	array* a = new array(data);
-
 	int size[2];
 	size[0] = data->getSize(0);
 	size[1] = size[0];
 
 	array* ones = new array(2, size, 1.0);
-
 	ones->mul(data);
 	ones->mul(1.0/double(data->getSize(0)));
+
+	array* a = new array(data);
 	a->sub(ones);
 
 	ones->freeArray(ones);
