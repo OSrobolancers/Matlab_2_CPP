@@ -111,6 +111,39 @@ array::array(int inNumOfDimensions, int* inSize, double* arr)
 	freeAbility		= 1;
 }
 
+array::array(int inNumOfDimensions, int* inSize, vector<vector<double> > vect)
+{
+	if (inSize != NULL)
+	{
+		int loc_NumOfElements = 1;
+
+		size 			= (int*)malloc(inNumOfDimensions*sizeof(int));
+		numOfDimensions = inNumOfDimensions;
+
+		for (int i = 0; i < numOfDimensions; i++)
+		{
+			size[i] = inSize[i];
+			loc_NumOfElements *= size[i];
+		}
+
+		numOfElements	= loc_NumOfElements;
+		data			= (double*)malloc(numOfElements*sizeof(double));
+
+		for (int i = 0; i < numOfElements; i++)
+		{
+			data[i] = vect[i/size[1]][i%size[1]];
+		}
+	}
+	else
+	{
+		data 			= NULL;
+		size 			= NULL;
+		numOfDimensions = 0;
+		numOfElements	= 0;
+	}
+	freeAbility		= 1;
+}
+
 array::array(array* arr)
 {
 	data 			= NULL;

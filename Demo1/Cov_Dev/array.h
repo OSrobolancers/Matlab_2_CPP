@@ -10,6 +10,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -26,6 +27,7 @@ public:
 	array(int inNumOfDimensions, int* inSize);
 	array(int inNumOfDimensions, int* inSize, double val);
 	array(int inNumOfDimensions, int* inSize, double* arr);
+	array(int inNumOfDimensions, int* inSize, vector<vector<double> > vect);
 	array(array* arr);
 
 	int getSize(int dimension);

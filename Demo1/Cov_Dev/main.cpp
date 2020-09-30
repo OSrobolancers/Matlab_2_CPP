@@ -7,7 +7,6 @@
 
 #include "cov.h"
 
-
 using namespace std;
 
 int main(void)
@@ -22,7 +21,17 @@ int main(void)
 
 	int size[] = {6, 3};
 
-	array* data = new array(2, size, (double*)Data);
+	vector<vector<double> > vect(6 , vector<double> (3));
+
+	for (int i = 0; i < size[0]; i++)
+	{
+		for (int j = 0; j < size[1]; j++)
+		{
+			vect[i][j] = Data[i][j];
+		}
+	}
+
+	array* data = new array(2, size, vect);
 	array* result = cov(data);
 
 	result->print();
@@ -30,8 +39,3 @@ int main(void)
 
 	return 0;
 }
-
-
-
-
-
