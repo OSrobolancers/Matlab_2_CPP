@@ -236,6 +236,40 @@ void array::transpose()
 
 }
 
+void array::diag()
+{
+	if (getSize(0) == 1)
+	{
+		int size[] = {getSize(1), getSize(1)};
+		array* tmp = new array(2, size, 0.0);
+
+		for (int i = 0; i < getSize(1); i++)
+		{
+			tmp->setEle(i, i, getEle(0, i));
+		}
+
+		update(tmp);
+		tmp->freeArray(tmp);
+	}
+	else if (getSize(1) == 1)
+	{
+		int size[] = {getSize(0), getSize(0)};
+		array* tmp = new array(2, size, 0.0);
+
+		for (int i = 0; i < getSize(0); i++)
+		{
+			tmp->setEle(i, i, getEle(i, 0));
+		}
+
+		update(tmp);
+		tmp->freeArray(tmp);
+	}
+	else
+	{
+
+	}
+}
+
 void array::update(array* arr)
 {
 	if (arr != NULL)

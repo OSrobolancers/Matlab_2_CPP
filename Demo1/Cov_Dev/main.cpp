@@ -9,7 +9,7 @@
 
 using namespace std;
 
-int main(void)
+void cov_testing()
 {
 	double Data[6][3] = { \
 			{90, 80, 40}, \
@@ -35,6 +35,42 @@ int main(void)
 	result->print();
 	result->freeArray(result);
 	free(vect);
+}
+
+void diag_testing1()
+{
+	vector<vector<double> >* vect = new vector<vector<double> >(3 , vector<double> (1));
+
+	(*vect)[0][0] = 1;
+	(*vect)[1][0] = 2;
+	(*vect)[2][0] = 3;
+
+	array* data = new array(vect);
+
+	data->diag();
+	data->print();
+
+}
+
+void diag_testing2()
+{
+	vector<vector<double> >* vect = new vector<vector<double> >(1 , vector<double> (3));
+
+	(*vect)[0][0] = 1;
+	(*vect)[0][1] = 2;
+	(*vect)[0][2] = 3;
+
+	array* data = new array(vect);
+
+	data->diag();
+	data->print();
+
+}
+int main(void)
+{
+	cov_testing();
+	diag_testing1();
+	diag_testing2();
 
 	return 0;
 }

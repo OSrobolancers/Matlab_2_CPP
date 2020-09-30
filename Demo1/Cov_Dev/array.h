@@ -36,6 +36,7 @@ public:
 	void mul(array* arr);
 	void mul(double val);
 	void transpose();
+	void diag();
 	void update(array* arr);
 	void update(double* arr);
 	void print();
