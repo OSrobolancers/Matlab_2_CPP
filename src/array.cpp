@@ -350,6 +350,21 @@ double array::sum()
 	return sum;
 }
 
+double array::det()
+{
+	double result = 0.0;
+
+	if ((vectPtr->size() == 3) && ((*vectPtr)[0].size() == 3))
+	{
+		result = \
+				getEle(0, 0) * (getEle(1, 1)*getEle(2, 2) - getEle(1, 2)*getEle(2, 1)) - \
+				getEle(0, 1) * (getEle(1, 0)*getEle(2, 2) - getEle(1, 2)*getEle(2, 0)) + \
+				getEle(0, 2) * (getEle(1, 0)*getEle(2, 1) - getEle(1, 1)*getEle(2, 0));
+	}
+
+	return result;
+}
+
 void array::update(array* arr)
 {
 	if (arr != NULL)

@@ -43,6 +43,7 @@ public:
 	double sum();
 	void sum1D(array* result);
 	void expArr(array* result);
+	double det();
 	void update(array* arr);
 	void update(double* arr);
 	void print();
