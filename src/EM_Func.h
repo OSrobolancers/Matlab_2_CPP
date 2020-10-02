@@ -30,6 +30,8 @@ void repmat3xN(array* mu, array* newData, int totalSize, int idx);
 
 void repmat4xN(array* arr, array* newData, int totalSize);
 
+void repmatNx1(array* arr, array* newData, int totalSize);
+
 void print2DVector(vector<vector<double> >& dataPrint);
 
 void printVecArr(vector<array*> mat2Print);

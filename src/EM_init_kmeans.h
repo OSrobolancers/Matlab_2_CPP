@@ -13,7 +13,7 @@
 #include <numeric>
 
 typedef struct{
-	array* Mu;
+	array* Mu;					//nbStates * 3
 	vector<array*> Sigma;
 	vector<double> Prior;
 	array* PriorArr;

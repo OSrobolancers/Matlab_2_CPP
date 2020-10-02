@@ -26,6 +26,8 @@ public:
 	array(int inNumOfDimensions, int* inSize, double* arr);
 	array(vector<vector<double> >* vect);
 	array(array* arr);
+	array(double start, double end, int numOfPoints);
+	array(double start, double end);
 
 	int getSize(int dimension);
 	double getEle(int row, int col);
@@ -37,13 +39,16 @@ public:
 	void mul(array* arr);
 	void mulReturn(array *arr, array* result);
 	void dotMul(array* arr, array* result);
+	void dotDiv(array* arr, array* result);
 	void mul(double val);
 	void transpose();
 	void diag();
 	double sum();
-	void sum1D(array* result);
+	void sum1D(array* result, int dim);
 	void expArr(array* result);
 	double det();
+	double minRow(int rowIdx);
+	double maxRow(int rowIdx);
 	void update(array* arr);
 	void update(double* arr);
 	void print();

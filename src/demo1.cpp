@@ -12,6 +12,7 @@
 #include "cov.h"
 #include "EM_init_kmeans.h"
 #include "EM_Func.h"
+#include "GMR.h"
 
 EM_Return_t EM_init_S;
 
@@ -55,6 +56,48 @@ int main(int argc, char **argv)
 
 	EM_init_kmeans(all_points, K);
 	EM(all_points);
+
+	int size[2];
+	size[0] = 3;
+	size[1] = all_points.size();
+	array* Data = new array(2, size);
+
+	for(unsigned int i = 0; i < all_points.size(); i++)
+	{
+		Data->setEle(T, i, all_points[i].getVal(T));
+		Data->setEle(X, i, all_points[i].getVal(X));
+		Data->setEle(Y, i, all_points[i].getVal(Y));
+	}
+
+	double nbVar = 3;
+
+	size[0] = nbVar;
+	size[1] = 1;
+	array* tmp = new array(Data->minRow(0), Data->maxRow(0), 100);
+	array* tmp2 = new array(1, nbVar-1);
+
+	//tmp->print();
+
+	GMR(tmp, 1-1, tmp2);
+
+	struct_tmp.expData->print();
+
+	struct_tmp.expSigma[0]->print();
+	struct_tmp.expSigma[1]->print();
+	struct_tmp.expSigma[2]->print();
+	struct_tmp.expSigma[3]->print();
+
+
+
+
+
+
+
+	//struct_tmp
+
+	tmp->freeArray(tmp);
+	tmp2->freeArray(tmp2);
+
 	return 0;
 }
 

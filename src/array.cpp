@@ -90,6 +90,27 @@ array::array(array* arr)
 	*vectPtr	= *arr->vectPtr;
 }
 
+array::array(double start, double end, int numOfPoints)
+{
+	vectPtr	= new vector<vector<double> >(1, vector<double> (numOfPoints));
+
+	for (int i = 0; i < numOfPoints; i++)
+	{
+		setEle(0, i, start + i*(end-start)/(numOfPoints-1));
+	}
+}
+
+array::array(double start, double end)
+{
+	int numOfPoints = end-start+1;
+	vectPtr	= new vector<vector<double> >(1, vector<double> (numOfPoints));
+
+	for (int i = 0; i < numOfPoints; i++)
+	{
+			setEle(0, i, start + i*(end-start)/(numOfPoints-1));
+	}
+}
+
 int array::getSize(int dimension)
 {
 	int returnVal = 0;
@@ -200,6 +221,7 @@ void array::mul(array *arr)
 		}
 
 		update(result);
+		result->freeArray(result);
 	}
 }
 
@@ -207,7 +229,6 @@ void array::mulReturn(array *arr, array* result)
 {
 	if (getSize(1) == arr->getSize(0))
 	{
-		int resultSize[] = {getSize(0), arr->getSize(1)};
 		double locResult;
 
 		for (int i = 0; i < result->getSize(0); i++)
@@ -222,22 +243,29 @@ void array::mulReturn(array *arr, array* result)
 				result->setEle(i, j, locResult);
 			}
 		}
-		//update(result);
 	}
 }
 
 void array::dotMul(array* arr, array* result)
 {
+	for (int i = 0; i < arr->getSize(0); i++)
+	{
+		for (int j = 0; j < arr->getSize(1); j++)
+		{
+			(*result->vectPtr)[i][j] = (*vectPtr)[i][j] * (*arr->vectPtr)[i][j];
+		}
+	}
+}
+
+void array::dotDiv(array* arr, array* result)
+{
 	if((getSize(0) == arr->getSize(0)) && (getSize(1) == arr->getSize(1)))
 	{
-		int resultSize[] = {getSize(0), arr->getSize(1)};
-		//array* result = new array(2, resultSize);
-
 		for (unsigned int i = 0; i < vectPtr->size(); i++)
 		{
 			for (unsigned int j = 0; j < (*vectPtr)[0].size(); j++)
 			{
-				(*result->vectPtr)[i][j] = (*vectPtr)[i][j] * (*arr->vectPtr)[i][j];
+				(*result->vectPtr)[i][j] = (*vectPtr)[i][j] / (*arr->vectPtr)[i][j];
 			}
 		}
 	}
@@ -313,14 +341,30 @@ void array::diag()
 
 	}
 }
-void array::sum1D(array* result)
+void array::sum1D(array* result, int dim)
 {
-	for (unsigned int i = 0; i < vectPtr->size(); i++)
+	switch (dim)
 	{
-		for (unsigned int j = 0; j < (*vectPtr)[0].size(); j++)
+	case 1:
+		for (unsigned int i = 0; i < (*vectPtr)[0].size(); i++)
 		{
-			(*result->vectPtr)[i][0] += getEle(i, j);
+			for (unsigned int j = 0; j < vectPtr->size(); j++)
+			{
+				(*result->vectPtr)[0][i] += getEle(j, i);
+			}
 		}
+		break;
+	case 2:
+		for (unsigned int i = 0; i < vectPtr->size(); i++)
+		{
+			for (unsigned int j = 0; j < (*vectPtr)[0].size(); j++)
+			{
+				(*result->vectPtr)[i][0] += getEle(i, j);
+			}
+		}
+		break;
+	default:
+		break;
 	}
 }
 
@@ -363,6 +407,32 @@ double array::det()
 	}
 
 	return result;
+}
+
+double array::minRow(int rowIdx)
+{
+	double minVal = getEle(rowIdx, 0);
+
+	for (unsigned int i = 1; i < getSize(1); i++)
+	{
+		if (getEle(rowIdx, i) < minVal)
+			minVal = getEle(rowIdx, i);
+	}
+
+	return minVal;
+}
+
+double array::maxRow(int rowIdx)
+{
+	double maxVal = getEle(rowIdx, 0);
+
+	for (unsigned int i = 1; i < getSize(1); i++)
+	{
+		if (getEle(rowIdx, i) > maxVal)
+			maxVal = getEle(rowIdx, i);
+	}
+
+	return maxVal;
 }
 
 void array::update(array* arr)

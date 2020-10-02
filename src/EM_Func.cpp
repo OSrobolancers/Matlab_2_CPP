@@ -15,8 +15,28 @@ void EM(vector<Point>& data)
 	int nbData = data.size();
 	int nbStates = EM_init_S.Sigma.size();
 	//double  = -1.79769e+308;
-	int nbStep = 0;
 	cout<<"nbStates: "<<nbStates<<endl;
+
+	double loglik_old = -1.7977e+308;
+	double loglik_threshold = 1e-10;
+
+	array* Pix;
+	array* diag;
+
+	int size[2];
+
+	size[0] = nbData;
+	size[1] = nbStates;
+
+	Pix = new array(2, size);		//nbData x nbStates
+
+	size[0] = nbVar;
+	size[1] = 1;
+
+	diag = new array(2, size, 1.0);
+	diag->diag();
+	diag->mul(1e-5);
+
 	while(true)
 	{
 		array* Pxi_temp;
@@ -27,19 +47,180 @@ void EM(vector<Point>& data)
 
 		for(int i = 0;i < nbStates;i++)
 		{
-			//cout<<(*EM_init_S.Mu->vectPtr)[i][0]<<endl;
-		    //Compute probability p(x|i) Pxi(:,i) =
 			gaussPDF(data, i); //return Pxi into global
 		}
+
 		//Line 75 EM
-		vect2Arr();
 		int prmSize[2] = {nbData, (int)EM_init_S.PriorArr->getSize(1)};
 		Pxi_temp = new array(2, prmSize);
 		repmat4xN(EM_init_S.PriorArr, Pxi_temp, nbData);
 		Pxi_temp->dotMul(EM_Func_s.PxiArr, Pxi_temp);
 		//Pxi_temp->print();
-		break;
+
+		size[0] = nbData;
+		size[1] = 1;
+		array* sum = new array(2, size);
+		Pxi_temp->sum1D(sum, 2);
+
+		size[0] = nbData;
+		size[1] = nbStates;
+
+		array* tmp = new array(2, size);
+
+		repmatNx1(sum, tmp, nbStates);
+		sum->freeArray(sum);
+
+		Pxi_temp->dotDiv(tmp, Pix);
+		tmp->freeArray(tmp);
+		Pxi_temp->freeArray(Pxi_temp);
+		//Pix->print();
+
+		size[0] = 1;
+		size[1] = nbStates;
+
+		array* E = new array(2, size, 0.0);
+		Pix->sum1D(E, 1);
+		//E->print();
+
+		size[0] = nbData;
+		size[1] = 1;
+		tmp = new array(2, size);
+
+		size[0] = 3;
+		size[1] = 1;
+		sum = new array(2, size);
+
+		size[0] = 3;
+		size[1] = nbData;
+		array* Data = new array(2, size);
+		array* DataTmp = new array();
+		array* DataTmp2 = new array();
+
+		array* tmp2 = new array(2, size);
+
+		size[0] = nbData;
+		size[1] = nbVar;
+		array* tmp3 = new array(2, size);
+
+		EM_init_S.Mu->transpose();
+
+		for(int i = 0; i < nbData; i++)
+		{
+			Data->setEle(T, i, data[i].getVal(T));
+			Data->setEle(X, i, data[i].getVal(X));
+			Data->setEle(Y, i, data[i].getVal(Y));
+		}
+
+		EM_init_S.Sigma[0]->freeArray(EM_init_S.Sigma[0]);
+		EM_init_S.Sigma[1]->freeArray(EM_init_S.Sigma[1]);
+		EM_init_S.Sigma[2]->freeArray(EM_init_S.Sigma[2]);
+		EM_init_S.Sigma[3]->freeArray(EM_init_S.Sigma[3]);
+
+		for(int i = 0; i < nbStates; i++)
+		{
+			size[0] = 3;
+			size[1] = nbData;
+			array* tmp4 = new array(2, size);
+			EM_init_S.PriorArr->setEle(0, i, E->getEle(0, i)/(double)nbData);
+
+			for (int j = 0; j < nbData; j++)
+				tmp->setEle(j, 0, Pix->getEle(j, i));
+
+			tmp->mul(1/E->getEle(0, i));
+			Data->mulReturn(tmp, sum);
+
+			for (int j = 0; j < EM_init_S.Mu->getSize(0); j++)
+				EM_init_S.Mu->setEle(j, i, sum->getEle(j, 0));
+
+			DataTmp->update(Data);
+			repmatNx1(sum, tmp2, nbData);
+			DataTmp->sub(tmp2);
+			DataTmp2->update(DataTmp);
+			DataTmp2->transpose();
+
+			tmp->mul(E->getEle(0, i));
+			repmatNx1(tmp, tmp3, nbVar);
+			tmp3->transpose();
+			tmp3->dotMul(DataTmp, tmp4);
+
+			tmp4->mul(DataTmp2);
+			tmp4->mul(1/E->getEle(0, i));
+			tmp4->add(diag);
+			tmp3->transpose();
+
+			EM_init_S.Sigma[i] = tmp4;
+		}
+		Data->freeArray(Data);
+		tmp->freeArray(tmp);
+		sum->freeArray(sum);
+		E->freeArray(E);
+		DataTmp->freeArray(DataTmp);
+		DataTmp2->freeArray(DataTmp2);
+		tmp2->freeArray(tmp2);
+		tmp3->freeArray(tmp3);
+
+//		EM_init_S.PriorArr->print();
+//		EM_init_S.Mu->print();
+//
+//		EM_init_S.Sigma[0]->print();
+//		EM_init_S.Sigma[1]->print();
+//		EM_init_S.Sigma[2]->print();
+//		EM_init_S.Sigma[3]->print();
+
+		EM_init_S.Mu->transpose();
+
+		for(int i = 0; i < nbStates; i++)
+		{
+			gaussPDF(data, i);
+		}
+
+		//EM_Func_s.PxiArr->print();
+
+		tmp = new array(EM_init_S.PriorArr);
+		tmp->transpose();
+
+		array* F = new array(EM_Func_s.PxiArr);
+		F->mul(tmp);
+		tmp->freeArray(tmp);
+
+		//F->print();
+
+		double loglik = 0.0;
+
+		for (int i = 0; i < F->getSize(0); i++)
+		{
+			if (F->getEle(i, 0) < 2.2251e-308)
+			{
+				F->setEle(i, 0, 2.2251e-308);
+			}
+			loglik += log(F->getEle(i, 0));
+		}
+		//F->print();
+		F->freeArray(F);
+
+		loglik /= F->getSize(0);
+
+		if (abs((loglik/loglik_old)-1) < loglik_threshold)
+		{
+			break;
+		}
+
+		loglik_old = loglik;
 	}
+//	EM_init_S.PriorArr->print();
+//	EM_init_S.Mu->print();
+
+	for(int i = 0; i < nbStates; i++)
+	{
+		EM_init_S.Sigma[i]->add(diag);
+	}
+//	EM_init_S.Sigma[0]->print();
+//	EM_init_S.Sigma[1]->print();
+//	EM_init_S.Sigma[2]->print();
+//	EM_init_S.Sigma[3]->print();
+
+	Pix->freeArray(Pix);
+	diag->freeArray(diag);
 }
 
 void gaussPDF(vector<Point>& data, int idx)
@@ -64,14 +245,17 @@ void gaussPDF(vector<Point>& data, int idx)
 	array* invSigma = new array(2, arrSize);
 	double determinant = DET3x3(EM_init_S.Sigma[idx]);
 	INV3x3(EM_init_S.Sigma[idx], determinant, invSigma);
+
 	arrSize[0] = dataArr->getSize(0);
 	arrSize[1] = dataArr->getSize(1);
 	array* tempArr = new array(2, arrSize);
 	dataArr->mulReturn(invSigma, tempArr);
-	dataArr->dotMul(dataArr, tempArr);
+	array* tempArr2 = new array(2, arrSize);
+	dataArr->dotMul(tempArr, tempArr2);
+
 	arrSize[1] = 1;
 	array* prob = new array(2, arrSize);
-	tempArr->sum1D(prob);
+	tempArr2->sum1D(prob, 2);
 
 	//Line 22 gaussPDF
 	arrSize[0] = prob->getSize(0);
@@ -79,6 +263,7 @@ void gaussPDF(vector<Point>& data, int idx)
 	array* locPxi = new array(2, arrSize);
 	prob->mul(-0.5);
 	prob->expArr(locPxi);
+
 	double PI_Res = power((2*M_PI), nbVar);
 	if(determinant < 0) //abs(det
 		determinant *= -1;
@@ -86,7 +271,13 @@ void gaussPDF(vector<Point>& data, int idx)
 	double deno = sqrt((PI_Res * determinant));
 	locPxi->mul((1/deno));
 
-	EM_Func_s.Pxi.push_back(locPxi);
+	for (int i = 0; i < nbData; i++)
+	{
+		EM_Func_s.PxiArr->setEle(i, idx, locPxi->getEle(i, 0));
+	}
+	//gaussPDFCnt++;
+
+//	EM_Func_s.Pxi.push_back(locPxi);
 
 
 	//EM_init_S.Sigma[idx]->print();
@@ -95,7 +286,6 @@ void gaussPDF(vector<Point>& data, int idx)
 
 void repmat3xN(array* mu, array* newData, int totalSize, int idx)
 {
-	int i = 0;
 	for(int i = 0;i < totalSize;i++)
 	{
 		(*newData->vectPtr)[i][T] = (*EM_init_S.Mu->vectPtr)[idx][T];
@@ -104,26 +294,34 @@ void repmat3xN(array* mu, array* newData, int totalSize, int idx)
 	}
 }
 
+void repmatNx1(array* arr, array* newData, int totalSize)
+{
+	int row = arr->getSize(0);
+	for(int i = 0;i < totalSize;i++)
+	{
+		for(int j = 0;j < row;j++)
+		{
+			newData->setEle(j, i, arr->getEle(j, 0));
+		}
+	}
+}
+
 void repmat4xN(array* arr, array* newData, int totalSize)
 {
-	int i = 0;
 	int row = arr->getSize(0);
 	int col = arr->getSize(1);
-	cout<<"row: "<<row<<endl;
-	cout<<"col: "<<col<<endl;
 	for(int i = 0;i < totalSize;i++)
 	{
 		for(int j = 0;j < row;j++)
 		{
 			for(int k = 0;k < col;k++)
-			(*newData->vectPtr)[i][k] = (*arr->vectPtr)[j][k];
+				(*newData->vectPtr)[i][k] = (*arr->vectPtr)[j][k];
 		}
 	}
 }
 
 void repmatVec(vector<double> p, array* newData, int totalSize, int idx)
 {
-	int i = 0;
 	for(int i = 0;i < totalSize;i++)
 	{
 		(*newData->vectPtr)[i][T] = (*EM_init_S.Mu->vectPtr)[idx][T];
@@ -180,7 +378,7 @@ void vect2Arr()
 	{
 		for(int j = 0;j < arrLr;j++)
 		{
-			(*EM_Func_s.PxiArr->vectPtr)[j][i] = (*EM_Func_s.Pxi[i]->vectPtr)[0][j];
+			(*EM_Func_s.PxiArr->vectPtr)[j][i] = (*EM_Func_s.Pxi[i]->vectPtr)[j][0];
 		}
 	}
 }
